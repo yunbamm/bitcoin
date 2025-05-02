@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.5'
     id 'io.spring.dependency-management' version '1.1.7'
+
+    id 'jacoco'
 }
 
 group = 'com.bitcoin'
@@ -43,3 +45,34 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+jacoco {
+    toolVersion = "0.8.11"  // 최신 버전 사용 가능
+}
+
+
+jacocoTestReport {
+    dependsOn test // 테스트 후 리포트 생성
+
+    reports {
+        html.required = true
+        xml.required = true
+    }
+    classDirectories.setFrom(fileTree(
+            dir: "$buildDir/classes/java/main",
+            excludes: ['**/SomeClassToExclude.class']
+    ))
+    sourceDirectories.setFrom(files("src/main/java"))
+    executionData.setFrom(fileTree(buildDir).include("/jacoco/test.exec"))
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8 // 최소 커버리지 비율 (80%)
+            }
+        }
+    }
+}
+
